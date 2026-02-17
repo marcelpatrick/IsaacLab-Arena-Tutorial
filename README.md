@@ -1,507 +1,512 @@
-# IsaacLab-Arena-Tutorial
+# Isaac Lab Arena: Complete Beginner's Guide
 
-
-# Complete Walkthrough: Creating an Isaac Lab Arena Project
-
-A step-by-step guide to building an external project with Isaac Lab Arena integration for easy task and object switching — perfect for your burger assembly automation project.
+A step-by-step tutorial for setting up Isaac Lab Arena using Docker containers, designed for developers new to Docker.
 
 ---
 
-## 📚 Reference Documentation & Resources
+## Table of Contents
 
-### Official Documentation
-| Resource | Link | Description |
-|----------|------|-------------|
-| **Isaac Lab Arena Docs** | [Documentation Home](https://isaac-sim.github.io/IsaacLab-Arena/main/index.html) | Main Arena documentation |
-| **Arena GitHub Repo** | [GitHub](https://github.com/isaac-sim/IsaacLab-Arena) | Source code and examples |
-| **First Arena Environment** | [Tutorial](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/first_arena_env.html) | Quick start guide |
-| **Assets Design** | [Concepts](https://isaac-sim.github.io/IsaacLab-Arena/release/0.1.1/pages/concepts/concept_assets_design.html) | How to create/register assets |
-| **Tasks Design** | [Concepts](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_tasks_design.html) | How to define tasks |
-| **Environment Setup** | [Example Workflow](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/step_1_environment_setup.html) | GR1 microwave example |
-
-### Isaac Lab Core Documentation
-| Resource | Link | Description |
-|----------|------|-------------|
-| **Isaac Lab Quickstart** | [Quickstart](https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html) | Getting started with Isaac Lab |
-| **Template Generator** | [Create Project](https://isaac-sim.github.io/IsaacLab/main/source/overview/own-project/template.html) | External project creation |
-| **Project Structure** | [Structure Guide](https://isaac-sim.github.io/IsaacLab/main/source/overview/own-project/project_structure.html) | Understanding 4-layer hierarchy |
-| **Manager-Based Env** | [Tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_base_env.html) | Creating manager-based environments |
-| **Environment Registration** | [Tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/register_rl_env_gym.html) | Registering with Gymnasium |
-
-### Video Tutorials (LycheeAI)
-| Resource | Link | Description |
-|----------|------|-------------|
-| **LycheeAI Hub** | [Website](https://lycheeai-hub.com/) | Comprehensive Isaac Lab learning platform |
-| **Template Generator Tutorial** | [Guide](https://lycheeai-hub.com/isaac-lab/build-your-own-isaac-lab-external-project-template-generator) | Step-by-step external project creation |
-| **Isaac Lab Basics Series** | [Tutorials](https://lycheeai-hub.com/isaac-lab) | Beginner to intermediate tutorials |
-| **SO-ARM101 Project** | [Project Page](https://lycheeai-hub.com/project-so-arm101-x-isaac-sim-x-isaac-lab-tutorial-series) | Real-world robot project example |
-
-### NVIDIA Official Resources
-| Resource | Link | Description |
-|----------|------|-------------|
-| **Isaac Lab Arena Blog** | [NVIDIA Blog](https://developer.nvidia.com/blog/simplify-generalist-robot-policy-evaluation-in-simulation-with-nvidia-isaac-lab-arena) | Official introduction and workflow |
-| **Isaac Lab Arena Product Page** | [NVIDIA Developer](https://developer.nvidia.com/isaac/lab-arena) | Product overview |
-| **Isaac Lab Product Page** | [NVIDIA Developer](https://developer.nvidia.com/isaac/lab) | Main Isaac Lab page |
-| **LeRobot Integration** | [HuggingFace Blog](https://huggingface.co/blog/nvidia/generalist-robotpolicy-eval-isaaclab-arena-lerobot) | Arena + LeRobot evaluation guide |
+1. [What is Docker? (Explained Simply)](#1-what-is-docker-explained-simply)
+2. [Prerequisites Checklist](#2-prerequisites-checklist)
+3. [Step 1: Install Docker](#3-step-1-install-docker)
+4. [Step 2: Install NVIDIA Container Toolkit](#4-step-2-install-nvidia-container-toolkit)
+5. [Step 3: Clone Isaac Lab Arena](#5-step-3-clone-isaac-lab-arena)
+6. [Step 4: Launch the Docker Container](#6-step-4-launch-the-docker-container)
+7. [Step 5: Verify Installation](#7-step-5-verify-installation)
+8. [Step 6: Run Your First Arena Environment](#8-step-6-run-your-first-arena-environment)
+9. [Step 7: Create Your Own Environment](#9-step-7-create-your-own-environment)
+10. [Docker Cheat Sheet](#10-docker-cheat-sheet)
+11. [Troubleshooting](#11-troubleshooting)
+12. [Reference Links](#12-reference-links)
 
 ---
 
-## Step 1: Prerequisites & Installation
+## 1. What is Docker? (Explained Simply)
 
-### 1.1 System Requirements
+### The Problem Docker Solves
 
-Before starting, ensure you have:
-- **GPU**: NVIDIA RTX 2070+ (16GB+ VRAM recommended)
-- **RAM**: 32GB+ recommended
-- **OS**: Ubuntu 22.04 (recommended) or Windows 11
-- **CUDA**: 12.x+
-- **Python**: 3.11
+Imagine you want to run Isaac Lab Arena. It requires:
+- Isaac Sim 5.1.0 (specific version)
+- Isaac Lab 2.3.0 (specific version)
+- NVIDIA drivers configured correctly
+- Python 3.11 with dozens of packages
+- Specific system libraries
 
-### 1.2 Install Isaac Lab + Arena
+Installing all of this manually is error-prone. One wrong version breaks everything.
+
+### Docker's Solution
+
+Docker creates a "container" — a self-contained box that has everything pre-installed and configured. Think of it like:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  YOUR COMPUTER (Host)                                       │
+│                                                             │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  DOCKER CONTAINER (Isolated Environment)            │   │
+│   │                                                     │   │
+│   │   ✓ Isaac Sim 5.1.0        (pre-installed)         │   │
+│   │   ✓ Isaac Lab 2.3.0        (pre-installed)         │   │
+│   │   ✓ Isaac Lab Arena        (pre-installed)         │   │
+│   │   ✓ Python 3.11 + packages (pre-installed)         │   │
+│   │   ✓ All dependencies       (pre-configured)        │   │
+│   │                                                     │   │
+│   │   You just write your code here!                    │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│   Your GPU ←── NVIDIA Container Toolkit ──→ Container       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Docker Concepts
+
+| Term | What It Means | Analogy |
+|------|---------------|---------|
+| **Image** | A template/blueprint with everything installed | A recipe |
+| **Container** | A running instance of an image | A dish made from the recipe |
+| **Volume** | Shared folder between your computer and container | A shared USB drive |
+| **Host** | Your actual computer | Your kitchen |
+
+
+NVIDIA provides a pre-built Docker image with Isaac Sim. Arena's Docker setup builds on top of it, ensuring everything works together correctly.
+
+---
+
+
+
+## 3. Step 1: Install Docker
+
+### Check if Docker is Already Installed
 
 ```bash
-# =============================================================================
-# STEP 1.2.1: Create conda environment
-# =============================================================================
-conda create -y -n burger_arena python=3.11
-conda activate burger_arena
-conda install -y -c conda-forge ffmpeg=7.1.1  # Required for video recording
+docker --version
+```
 
-# =============================================================================
-# STEP 1.2.2: Install Isaac Sim 5.1.0
-# Reference: https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/pip_installation.html
-# =============================================================================
-pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com
+If you see a version number (e.g., `Docker version 26.0.0`), skip to Step 2.
 
-# IMPORTANT: Accept NVIDIA EULA (required for first run)
-export ACCEPT_EULA=Y
-export PRIVACY_CONSENT=Y
+### Install Docker (Ubuntu 22.04)
 
-# Verify Isaac Sim installation
-isaacsim --help
+Run these commands one at a time:
 
-# =============================================================================
-# STEP 1.2.3: Install Isaac Lab 2.3.0
-# Reference: https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html
-# =============================================================================
-git clone https://github.com/isaac-sim/IsaacLab.git
-cd IsaacLab
-git checkout v2.3.0
+```bash
+# 1. Download Docker's install script
+curl -fsSL https://get.docker.com -o get-docker.sh
 
-# Install Isaac Lab and all RL libraries
-./isaaclab.sh -i  # or on Windows: isaaclab.bat -i
+# 2. Run the install script
+sudo sh get-docker.sh
 
-# Verify installation
-./isaaclab.sh -p scripts/tutorials/00_sim/create_empty.py
+# 3. Start Docker service
+sudo systemctl start docker
+sudo systemctl enable docker
+```
 
-cd ..  # Return to parent directory
+### Configure Docker to Run Without `sudo`
 
-# =============================================================================
-# STEP 1.2.4: Install Isaac Lab Arena
-# Reference: https://github.com/isaac-sim/IsaacLab-Arena
-# =============================================================================
+By default, Docker requires `sudo`. This fixes that:
+
+```bash
+# 1. Create docker group (may already exist)
+sudo groupadd docker
+
+# 2. Add your user to the docker group
+sudo usermod -aG docker $USER
+
+# 3. Apply the group change (or log out and back in)
+newgrp docker
+```
+
+### Verify Docker Installation
+
+```bash
+# Test without sudo
+docker run hello-world
+```
+
+You should see:
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+### Install Docker Compose
+
+```bash
+# Check if already installed
+docker compose version
+
+# If not installed:
+sudo apt install docker-compose-plugin
+```
+
+---
+
+## 4. Step 2: Install NVIDIA Container Toolkit (OPTIONAL IF YOU DON'T HAVE A DOCKER CONTAINER WITH ISAACSIM AND ISAACLAB INSTALLED YET)
+
+This toolkit allows Docker containers to access your NVIDIA GPU.
+
+### Check if Already Installed
+
+```bash
+nvidia-ctk --version
+```
+
+If you see a version, skip to Step 3.
+
+### Install NVIDIA Container Toolkit (Ubuntu)
+
+```bash
+# 1. Add NVIDIA's package repository
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+  sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+  sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+# 2. Update package list
+sudo apt update
+
+# 3. Install the toolkit
+sudo apt install -y nvidia-container-toolkit
+
+# 4. Configure Docker to use NVIDIA runtime
+sudo nvidia-ctk runtime configure --runtime=docker
+
+# 5. Restart Docker to apply changes
+sudo systemctl restart docker
+```
+
+### Verify GPU Access in Docker
+
+```bash
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+```
+
+You should see your GPU information (same as running `nvidia-smi` on your host).
+
+If this fails with "could not select device driver", restart your computer and try again.
+
+---
+
+## 5. Step 3: Clone Isaac Lab Arena
+
+### Clone the Repository
+
+```bash
+# Navigate to where you want the project
+cd ~
+
+# Clone Isaac Lab Arena
 git clone https://github.com/isaac-sim/IsaacLab-Arena.git
+
+# Enter the directory
 cd IsaacLab-Arena
-git checkout release/0.1.1  # Use stable release
+```
 
-# Install Arena in editable mode
+### Initialize Submodules (CRITICAL!)
+
+This downloads Isaac Lab and other dependencies:
+
+```bash
+git config submodule.submodules/IsaacLab.url https://github.com/isaac-sim/IsaacLab.git
+git config submodule.submodules/Isaac-GR00T.url https://github.com/NVIDIA/Isaac-GR00T.git
+
+git submodule update --init --recursive
+```
+
+This may take 5-10 minutes. You'll see it downloading Isaac Lab into `submodules/IsaacLab/`.
+
+```
 pip install -e .
-
-# Install additional dependencies
-pip install onnxruntime==1.23.2 numpy==1.26.0
-
-cd ..  # Return to parent directory
 ```
 
-> 📖 **Reference**: [Isaac Lab Arena Installation](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/installation.html)
+Test
+```
+python -c "import isaaclab_arena; print('Success!')"
+```
+Sould print "Success!"
+
+Check available commands
+```
+python -m isaaclab_arena.examples.example_environments.cli --help
+```
 
 ---
 
-## Step 2: Generate Template Project
+## 6. Step 4: Launch the Docker Container
 
-### 2.1 Run the Template Generator
+### First Launch (Downloads ~20GB)
+
+From the `IsaacLab-Arena` directory:
 
 ```bash
-# Navigate to Isaac Lab directory
-cd IsaacLab
-
-# Run the template generator wizard
-./isaaclab.sh --new   # Linux
-# OR
-isaaclab.bat --new    # Windows
+./docker/run_docker.sh
 ```
 
-### 2.2 Wizard Options to Select
+**What happens:**
+1. Docker downloads the NVIDIA Isaac Sim base image (~15GB)
+2. Builds the Arena layer on top (~5GB)
+3. Starts the container
+4. Drops you into a shell inside the container
 
-When the wizard prompts you, choose these options for Arena compatibility:
+The first run takes 15-30 minutes depending on your internet speed. Subsequent runs are instant.
 
+### You're Now Inside the Container!
+
+Your terminal prompt changes to something like:
 ```
-? Select project type:
-  > External  ← SELECT THIS (required for Arena)
-
-? Select workflow:
-  > manager   ← SELECT THIS (Arena uses manager-based workflow)
-
-? Select RL libraries (space to select, enter to confirm):
-  [x] skrl    ← Recommended for manipulation
-  [ ] rsl_rl
-  [ ] rl_games
-  [ ] sb3
-
-? Select algorithm:
-  > ppo       ← Good default for manipulation
-
-? Enter project name:
-  > burger_assembly_arena
-
-? Enter project path:
-  > ../burger_assembly_arena  ← Creates outside Isaac Lab folder
+root@abc123def456:/workspace/isaaclab-arena#
 ```
 
-### 2.3 What Gets Generated
+You are now:
+- Inside an isolated Ubuntu environment
+- With Isaac Sim, Isaac Lab, and Arena pre-installed
+- With access to your GPU
+- In the `/workspace/isaaclab-arena` directory
+
+### Understanding the Workspace
 
 ```
-burger_assembly_arena/           # PROJECT ROOT
-├── scripts/
-│   ├── skrl/
-│   │   ├── train.py            # Training script
-│   │   └── play.py             # Evaluation script
-│   ├── list_envs.py            # List registered environments
-│   ├── random_agent.py         # Test with random actions
-│   └── zero_agent.py           # Test with zero actions
-├── source/
-│   └── burger_assembly_arena/   # EXTENSION
-│       ├── config/
-│       │   └── extension.toml   # Extension metadata
-│       ├── pyproject.toml       # Package metadata
-│       ├── setup.py             # Installation script
-│       └── burger_assembly_arena/  # MODULE
-│           ├── __init__.py
-│           └── tasks/
-│               └── direct/
-│                   └── burger_assembly_arena/  # TASK
-│                       ├── __init__.py         # gym.register() here!
-│                       ├── burger_assembly_arena_env_cfg.py
-│                       └── burger_assembly_arena_env.py
-├── README.md
-└── LICENSE
+INSIDE CONTAINER:
+/workspace/
+├── isaaclab-arena/        ← Arena code (mounted from your host)
+│   ├── isaaclab_arena/
+│   └── submodules/IsaacLab/
+└── (Isaac Sim is installed elsewhere in the container)
 ```
 
-> 📖 **Reference**: [Project Structure](https://isaac-sim.github.io/IsaacLab/main/source/overview/own-project/project_structure.html)  
-> 📺 **Video**: [LycheeAI Template Generator Tutorial](https://lycheeai-hub.com/isaac-lab/build-your-own-isaac-lab-external-project-template-generator)
+**Key insight:** The `isaaclab-arena` folder is "mounted" from your host computer. This means:
+- Files you edit on your host appear inside the container
+- Files created in the container appear on your host
+- You can use VS Code on your host while running code in the container
 
 ---
 
-## Step 3: Add Arena Integration Files
+## 7. Step 5: Verify Installation
 
-Now we modify the template to use Arena's composable architecture.
-
-### 3.1 Create Arena Environment Directory Structure
+### Inside the container, run these checks:
 
 ```bash
-cd burger_assembly_arena
+# 1. Check Python (should show Isaac Sim's Python)
+python --version
+# Expected: Python 3.11.x
 
-# Create Arena-specific directories
-mkdir -p source/burger_assembly_arena/burger_assembly_arena/assets
-mkdir -p source/burger_assembly_arena/burger_assembly_arena/embodiments
-mkdir -p source/burger_assembly_arena/burger_assembly_arena/environments
-mkdir -p source/burger_assembly_arena/burger_assembly_arena/tasks_arena
+# 2. Check Isaac Lab is importable
+python -c "import isaaclab; print('Isaac Lab OK')"
 
-# Create __init__.py files
-touch source/burger_assembly_arena/burger_assembly_arena/assets/__init__.py
-touch source/burger_assembly_arena/burger_assembly_arena/embodiments/__init__.py
-touch source/burger_assembly_arena/burger_assembly_arena/environments/__init__.py
-touch source/burger_assembly_arena/burger_assembly_arena/tasks_arena/__init__.py
+# 3. Check Arena is importable
+python -c "import isaaclab_arena; print('Arena OK')"
+
+# 4. Check GPU is accessible
+python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+# Expected: CUDA available: True
 ```
 
-### 3.2 Create Custom Asset: Burger Patty
+### Run Arena's Built-in Tests (Optional)
 
-Create `source/burger_assembly_arena/burger_assembly_arena/assets/patty.py`:
+```bash
+# Quick test (no cameras)
+pytest -sv -m "not with_cameras" isaaclab_arena/tests/
 
-```python
-# =============================================================================
-# PATTY ASSET DEFINITION
-# This file defines a burger patty as a registerable Arena asset.
-# Reference: https://isaac-sim.github.io/IsaacLab-Arena/release/0.1.1/pages/concepts/concept_assets_design.html
-# =============================================================================
-
-from isaaclab_arena.assets.object_library import LibraryObject, register_asset
-from isaaclab_arena.assets.object_base import ObjectType
-
-
-@register_asset  # This decorator adds the asset to Arena's registry
-class Patty(LibraryObject):
-    """Burger patty for stacking task.
-    
-    This asset can be retrieved using:
-        patty = asset_registry.get_asset_by_name("patty")()
-    
-    Or find all food items:
-        foods = asset_registry.get_assets_by_tag("food")
-    """
-    
-    # ==========================================================================
-    # REQUIRED: Asset identification
-    # ==========================================================================
-    name = "patty"  # Used in: asset_registry.get_asset_by_name("patty")
-    
-    # Tags for grouping/filtering assets
-    tags = ["object", "food", "burger", "stackable"]
-    
-    # ==========================================================================
-    # REQUIRED: Asset source
-    # ==========================================================================
-    # Option 1: Use NVIDIA Nucleus asset (if available)
-    # usd_path = f"{ISAAC_NUCLEUS_DIR}/Props/Food/Patty/patty.usd"
-    
-    # Option 2: Use local USD file in your project
-    usd_path = "source/burger_assembly_arena/assets/usd/patty.usd"
-    
-    # Option 3: Use a simple primitive for prototyping
-    # (We'll use this for now - replace with real USD later)
-    
-    # ==========================================================================
-    # REQUIRED: Physics type
-    # ==========================================================================
-    object_type = ObjectType.RIGID  # Options: RIGID, DEFORMABLE, ARTICULATED
-    
-    # ==========================================================================
-    # OPTIONAL: Physics properties
-    # ==========================================================================
-    mass = 0.15  # kg (realistic patty weight)
-    
-    # Collision properties
-    collision_enabled = True
-    contact_offset = 0.001  # m
-    rest_offset = 0.0  # m
-    
-    # Friction for realistic food handling
-    static_friction = 0.6
-    dynamic_friction = 0.5
-    restitution = 0.1  # Low bounce
-    
-    # ==========================================================================
-    # OPTIONAL: Visual properties
-    # ==========================================================================
-    # These are set in the USD file, but can be overridden
-    scale = (1.0, 1.0, 1.0)
-
-
-@register_asset
-class CheeseSlice(LibraryObject):
-    """Cheese slice for burger assembly.
-    
-    Similar to patty but with different physics properties.
-    """
-    
-    name = "cheese_slice"
-    tags = ["object", "food", "burger", "stackable"]
-    
-    usd_path = "source/burger_assembly_arena/assets/usd/cheese.usd"
-    object_type = ObjectType.RIGID
-    
-    mass = 0.03  # kg (lighter than patty)
-    static_friction = 0.4
-    dynamic_friction = 0.3
-    restitution = 0.05
-
-
-@register_asset
-class BunBottom(LibraryObject):
-    """Bottom bun - the base for stacking."""
-    
-    name = "bun_bottom"
-    tags = ["object", "food", "burger", "base"]
-    
-    usd_path = "source/burger_assembly_arena/assets/usd/bun_bottom.usd"
-    object_type = ObjectType.RIGID
-    
-    mass = 0.05
-    static_friction = 0.5
-    dynamic_friction = 0.4
-
-
-@register_asset
-class BunTop(LibraryObject):
-    """Top bun - placed last on the burger."""
-    
-    name = "bun_top"
-    tags = ["object", "food", "burger"]
-    
-    usd_path = "source/burger_assembly_arena/assets/usd/bun_top.usd"
-    object_type = ObjectType.RIGID
-    
-    mass = 0.04
-    static_friction = 0.5
-    dynamic_friction = 0.4
+# Full test (with cameras, slower)
+pytest -sv -m with_cameras isaaclab_arena/tests/
 ```
 
-> 📖 **Reference**: [Assets Design Concepts](https://isaac-sim.github.io/IsaacLab-Arena/release/0.1.1/pages/concepts/concept_assets_design.html)
+---
 
-### 3.3 Create Arena Environment Definition
+## 8. Step 6: Run Your First Arena Environment
 
-Create `source/burger_assembly_arena/burger_assembly_arena/environments/burger_stack_env.py`:
+### List Available Example Environments
+
+```bash
+ls isaaclab_arena/examples/
+```
+
+You should see files like:
+- `franka_lift_env.py` — Franka robot lifting objects
+- `gr1_open_microwave_env.py` — GR1 humanoid opening microwave
+
+### Run the Franka Lift Example
+
+```bash
+python isaaclab_arena/scripts/run_env.py \
+    --enable_cameras \
+    franka_lift
+```
+
+**What happens:**
+- Isaac Sim launches
+- A Franka robot appears in a scene
+- Objects appear for the robot to interact with
+- The simulation runs
+
+Press `Ctrl+C` to stop.
+
+### Run with Different Options
+
+```bash
+# Headless mode (no GUI, faster for training)
+python isaaclab_arena/scripts/run_env.py \
+    --headless \
+    franka_lift
+
+# More parallel environments
+python isaaclab_arena/scripts/run_env.py \
+    --num_envs 16 \
+    --headless \
+    franka_lift
+```
+
+---
+
+## 9. Step 7: Create Your Own Environment
+
+Now let's create a simple custom environment using **only pre-built assets**.
+
+### What's Available in the Registry?
+
+Arena provides these pre-built assets:
+
+| Category | Asset Name | Description |
+|----------|------------|-------------|
+| **Robots** | `franka` | Franka Panda 7-DOF arm |
+| **Robots** | `gr1`, `gr1_pink` | GR1 humanoid robot |
+| **Robots** | `g1` | G1 humanoid robot |
+| **Scenes** | `kitchen` | Full kitchen environment |
+| **Scenes** | `table` | Simple table |
+| **Objects** | `tomato_soup_can` | YCB dataset soup can |
+| **Objects** | `microwave` | Openable microwave |
+| **Tasks** | `PickAndPlaceTask` | Pick up and place objects |
+| **Tasks** | `OpenDoorTask` | Open doors/cabinets |
+| **Teleop** | `keyboard` | Keyboard control |
+
+### Create Your Environment File
+
+Still inside the container, create a new file:
+
+```bash
+# Create a directory for your environments
+mkdir -p /workspace/isaaclab-arena/my_environments
+
+# Create the file (using nano, vim, or edit from host)
+nano /workspace/isaaclab-arena/my_environments/soup_pickup_env.py
+```
+
+Paste this code:
 
 ```python
-# =============================================================================
-# BURGER STACK ARENA ENVIRONMENT
-# This is the core file where we compose Scene + Embodiment + Task
-# Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/step_1_environment_setup.html
-# =============================================================================
-
+"""
+My First Arena Environment
+--------------------------
+Franka robot picks up a tomato soup can from a table.
+Uses ONLY pre-built Arena assets.
+"""
 import argparse
-from typing import Optional
 
-# =============================================================================
-# Arena Imports
-# Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/index.html
-# =============================================================================
+from isaaclab_arena.assets.asset_registry import asset_registry
+from isaaclab_arena.assets.device_registry import device_registry
 from isaaclab_arena.environments.isaaclab_arena_environment import IsaacLabArenaEnvironment
 from isaaclab_arena.scene.scene import Scene
 from isaaclab_arena.tasks.pick_and_place_task import PickAndPlaceTask
-from isaaclab_arena.assets.asset_registry import asset_registry
-from isaaclab_arena.teleop.device_registry import device_registry
+from isaaclab_arena.assets.object_reference import ObjectReference
+from isaaclab_arena.assets.object_base import ObjectType
 from isaaclab_arena.utils.pose import Pose
-from isaaclab_arena.assets.object_reference import ObjectReference, ObjectType
-
-# Import our custom assets (registers them when imported)
-from ..assets import patty  # This import triggers @register_asset
+from isaaclab_arena.examples.base_env import ExampleEnvironmentBase
 
 
-class BurgerStackEnvironment:
-    """Arena environment for burger patty stacking.
+class SoupPickupEnvironment(ExampleEnvironmentBase):
+    """
+    Simple pick-and-place environment.
     
-    This environment demonstrates Arena's composable architecture:
-    - Embodiment (robot) can be switched via CLI argument
-    - Scene objects can be easily added/removed
-    - Task logic is reusable across different setups
-    
-    Usage:
-        env_def = BurgerStackEnvironment()
-        arena_env = env_def.get_env(args_cli)
-        env_builder = ArenaEnvBuilder(arena_env, args_cli)
-        env = env_builder.make_registered()
-    
-    Reference:
-        https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/step_1_environment_setup.html
+    Components (all from Arena's pre-built registry):
+    - Robot: Franka Panda arm
+    - Scene: Kitchen background
+    - Object: Tomato soup can (YCB dataset)
+    - Task: Pick and place
     """
     
-    # Environment name (used for gym registration)
-    name: str = "burger_patty_stack"
+    name: str = "soup_pickup"
     
     def get_env(self, args_cli: argparse.Namespace) -> IsaacLabArenaEnvironment:
-        """Compose and return the Arena environment.
+        """Build and return the environment."""
         
-        Args:
-            args_cli: Command line arguments containing:
-                - embodiment: Robot name (e.g., "franka", "xarm6")
-                - enable_cameras: Whether to enable camera sensors
-                - teleop_device: Input device name (e.g., "keyboard")
+        # ─────────────────────────────────────────────────────────────
+        # 1. GET ROBOT FROM REGISTRY
+        # ─────────────────────────────────────────────────────────────
+        # The robot (called "embodiment" in Arena) is loaded by name.
+        # Available: "franka", "gr1", "gr1_pink", "g1"
         
-        Returns:
-            IsaacLabArenaEnvironment: Composed environment ready for building
-        """
-        
-        # =====================================================================
-        # STEP 1: Get Embodiment (Robot) from Registry
-        # This is SWAPPABLE via CLI: --embodiment franka OR --embodiment xarm6
-        # Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_embodiment_design.html
-        # =====================================================================
-        embodiment = asset_registry.get_asset_by_name(
-            args_cli.embodiment  # e.g., "franka", "xarm6", "ur10"
-        )(
-            enable_cameras=getattr(args_cli, 'enable_cameras', False)
+        embodiment = self.asset_registry.get_asset_by_name("franka")(
+            enable_cameras=args_cli.enable_cameras
         )
         
-        # Set robot's initial pose in the world
-        embodiment.set_initial_pose(Pose(
-            position_xyz=(0.0, 0.0, 0.0),  # Robot base at origin
-            rotation_wxyz=(1.0, 0.0, 0.0, 0.0)  # No rotation (quaternion)
-        ))
+        # ─────────────────────────────────────────────────────────────
+        # 2. GET SCENE/BACKGROUND FROM REGISTRY
+        # ─────────────────────────────────────────────────────────────
+        # The background scene provides the environment.
+        # Available: "kitchen", "table", etc.
         
-        # =====================================================================
-        # STEP 2: Get Scene Objects from Registry
-        # EASILY SWAPPABLE: Change "patty" to "cheese_slice" for different task
-        # Reference: https://isaac-sim.github.io/IsaacLab-Arena/release/0.1.1/pages/concepts/concept_assets_design.html
-        # =====================================================================
+        background = self.asset_registry.get_asset_by_name("kitchen")()
         
-        # Background/table (where everything sits)
-        background = asset_registry.get_asset_by_name("table")()
-        # Alternative: kitchen = asset_registry.get_asset_by_name("kitchen")()
+        # ─────────────────────────────────────────────────────────────
+        # 3. GET OBJECT FROM REGISTRY
+        # ─────────────────────────────────────────────────────────────
+        # Objects the robot will interact with.
+        # Available: "tomato_soup_can", "microwave", etc.
         
-        # Object to manipulate - THIS IS THE KEY SWAPPABLE COMPONENT
-        pick_object = asset_registry.get_asset_by_name("patty")()
-        # To test with different object, just change to:
-        # pick_object = asset_registry.get_asset_by_name("cheese_slice")()
-        # pick_object = asset_registry.get_asset_by_name("tomato_soup_can")()  # Pre-built Arena asset!
+        soup_can = self.asset_registry.get_asset_by_name("tomato_soup_can")()
         
-        # =====================================================================
-        # STEP 3: Set Object Initial Poses
-        # Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_scene_design.html
-        # =====================================================================
-        pick_object.set_initial_pose(Pose(
-            position_xyz=(0.5, 0.0, 0.1),  # In front of robot, slightly elevated
-            rotation_wxyz=(1.0, 0.0, 0.0, 0.0)
-        ))
+        # Set where the object starts
+        soup_can.set_initial_pose(
+            Pose(
+                position_xyz=(0.5, 0.0, 0.8),  # x=forward, y=left, z=up
+                rotation_wxyz=(1.0, 0.0, 0.0, 0.0)  # w,x,y,z quaternion (upright)
+            )
+        )
         
-        # =====================================================================
-        # STEP 4: Define Destination Location
-        # This is where the robot should place the object
-        # =====================================================================
+        # ─────────────────────────────────────────────────────────────
+        # 4. DEFINE DESTINATION (where to place the object)
+        # ─────────────────────────────────────────────────────────────
+        # ObjectReference points to a location in the scene
+        
         destination = ObjectReference(
-            name="stack_position",
-            # Use ENV_REGEX_NS for per-environment paths
-            prim_path="{ENV_REGEX_NS}/destination_marker",
+            name="destination_location",
+            prim_path="{ENV_REGEX_NS}/kitchen/Counter_01",  # A counter in the kitchen
             parent_asset=background,
             object_type=ObjectType.RIGID,
         )
-        # Alternative: Reference a location on the table/kitchen
-        # destination = ObjectReference(
-        #     name="assembly_station",
-        #     prim_path="{ENV_REGEX_NS}/table/assembly_zone",
-        #     parent_asset=background,
-        #     object_type=ObjectType.RIGID,
-        # )
         
-        # =====================================================================
-        # STEP 5: Compose Scene
-        # The Scene is just a list of assets - very composable!
-        # Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_scene_design.html
-        # =====================================================================
-        scene = Scene(assets=[
-            background,
-            pick_object,
-            # Add more objects easily:
-            # asset_registry.get_asset_by_name("cheese_slice")(),
-            # asset_registry.get_asset_by_name("bun_bottom")(),
-        ])
+        # ─────────────────────────────────────────────────────────────
+        # 5. GET TELEOP DEVICE FROM REGISTRY
+        # ─────────────────────────────────────────────────────────────
+        # How you control the robot interactively.
+        # Available: "keyboard", "spacemouse", "avp_handtracking"
         
-        # =====================================================================
-        # STEP 6: Define Task
-        # Tasks are REUSABLE - PickAndPlaceTask works with ANY object
-        # Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_tasks_design.html
-        # =====================================================================
+        teleop_device = self.device_registry.get_device_by_name("keyboard")()
+        
+        # ─────────────────────────────────────────────────────────────
+        # 6. COMPOSE THE SCENE
+        # ─────────────────────────────────────────────────────────────
+        # Combine background and objects into a scene
+        
+        scene = Scene(assets=[background, soup_can])
+        
+        # ─────────────────────────────────────────────────────────────
+        # 7. CREATE THE TASK
+        # ─────────────────────────────────────────────────────────────
+        # The task defines what the robot should do.
+        # Available: PickAndPlaceTask, OpenDoorTask, etc.
+        
         task = PickAndPlaceTask(
-            pick_up_object=pick_object,
-            destination_location=destination,
-            background_scene=background,
-            # Optional parameters:
-            # success_threshold=0.05,  # Distance tolerance for success
-            # grasp_height_offset=0.02,  # Approach height above object
+            pick_object=soup_can,
+            place_location=destination,
+            background=background
         )
         
-        # =====================================================================
-        # STEP 7: Get Teleoperation Device
-        # For data collection and testing
-        # =====================================================================
-        teleop_device = device_registry.get_device_by_name(
-            getattr(args_cli, 'teleop_device', 'keyboard')
-        )()
+        # ─────────────────────────────────────────────────────────────
+        # 8. RETURN THE COMPOSED ENVIRONMENT
+        # ─────────────────────────────────────────────────────────────
         
-        # =====================================================================
-        # STEP 8: Compose Final Environment
-        # This brings everything together into an IsaacLabArenaEnvironment
-        # =====================================================================
         return IsaacLabArenaEnvironment(
             name=self.name,
             embodiment=embodiment,
@@ -511,497 +516,257 @@ class BurgerStackEnvironment:
         )
 
 
-class BurgerCheeseStackEnvironment(BurgerStackEnvironment):
-    """Variant: Stack cheese instead of patty.
-    
-    This demonstrates how easy it is to create variants with Arena!
-    """
-    
-    name: str = "burger_cheese_stack"
-    
-    def get_env(self, args_cli: argparse.Namespace) -> IsaacLabArenaEnvironment:
-        # Get base environment
-        base_env = super().get_env(args_cli)
-        
-        # Just swap the object
-        cheese = asset_registry.get_asset_by_name("cheese_slice")()
-        cheese.set_initial_pose(Pose(
-            position_xyz=(0.5, 0.0, 0.1),
-            rotation_wxyz=(1.0, 0.0, 0.0, 0.0)
-        ))
-        
-        # Update scene and task
-        base_env.scene = Scene(assets=[
-            asset_registry.get_asset_by_name("table")(),
-            cheese,
-        ])
-        base_env.task = PickAndPlaceTask(
-            pick_up_object=cheese,
-            destination_location=base_env.task.destination_location,
-            background_scene=asset_registry.get_asset_by_name("table")(),
-        )
-        base_env.name = self.name
-        
-        return base_env
+# This allows Arena's run_env.py to find your environment
+def register_environment():
+    return SoupPickupEnvironment()
 ```
 
-> 📖 **Reference**: [Environment Setup Example](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/step_1_environment_setup.html)
+### Register Your Environment
 
-### 3.4 Create Entry Point Script
+Create an `__init__.py` to make it a Python package:
 
-Create `scripts/run_arena_env.py`:
+```bash
+echo "from .soup_pickup_env import SoupPickupEnvironment" > /workspace/isaaclab-arena/my_environments/__init__.py
+```
 
-```python
-#!/usr/bin/env python3
-# =============================================================================
-# ARENA ENVIRONMENT ENTRY POINT
-# This script demonstrates how to run an Arena environment.
-# 
-# Usage examples:
-#   # Run with Franka robot
-#   python scripts/run_arena_env.py --embodiment franka
-#   
-#   # Run with different robot (if available)
-#   python scripts/run_arena_env.py --embodiment xarm6
-#   
-#   # Run with cameras enabled
-#   python scripts/run_arena_env.py --embodiment franka --enable_cameras
-#
-# Reference: https://isaac-sim.github.io/IsaacLab-Arena/main/index.html
-# =============================================================================
+### Run Your Custom Environment
 
-"""Launch Isaac Sim Simulator first."""
+```bash
+# From inside the container
+cd /workspace/isaaclab-arena
 
+# Run your environment
+python -c "
+from my_environments.soup_pickup_env import SoupPickupEnvironment
 import argparse
-from isaaclab.app import AppLauncher
 
-# =============================================================================
-# STEP 1: Parse Command Line Arguments
-# These arguments control which robot, device, and settings to use
-# =============================================================================
-parser = argparse.ArgumentParser(
-    description="Run burger assembly Arena environment"
+# Create minimal args
+args = argparse.Namespace(
+    enable_cameras=True,
+    teleop_device='keyboard',
+    headless=False
 )
-
-# Arena-specific arguments
-parser.add_argument(
-    "--embodiment", 
-    type=str, 
-    default="franka",
-    help="Robot embodiment name from registry (e.g., franka, ur10, xarm6)"
-)
-parser.add_argument(
-    "--teleop_device", 
-    type=str, 
-    default="keyboard",
-    help="Teleop device name (keyboard, spacemouse, gamepad)"
-)
-parser.add_argument(
-    "--enable_cameras", 
-    action="store_true",
-    help="Enable camera sensors on the robot"
-)
-
-# Standard Isaac Lab arguments
-parser.add_argument(
-    "--num_envs", 
-    type=int, 
-    default=1,
-    help="Number of parallel environments"
-)
-parser.add_argument(
-    "--headless", 
-    action="store_true",
-    help="Run without GUI (for training)"
-)
-
-# Add Isaac Lab/Sim arguments (device, etc.)
-AppLauncher.add_app_launcher_args(parser)
-
-args_cli = parser.parse_args()
-
-# =============================================================================
-# STEP 2: Launch Isaac Sim Application
-# IMPORTANT: This must happen BEFORE any other Isaac imports!
-# Reference: https://isaac-sim.github.io/IsaacLab/main/source/tutorials/00_sim/launch_app.html
-# =============================================================================
-app_launcher = AppLauncher(args_cli)
-simulation_app = app_launcher.app
-
-# =============================================================================
-# STEP 3: Import Arena and Environment (AFTER app launch)
-# =============================================================================
-import torch
-
-from isaaclab_arena.env_builder.arena_env_builder import ArenaEnvBuilder
-
-# Import our custom environment (this also imports/registers our assets)
-from burger_assembly_arena.environments.burger_stack_env import BurgerStackEnvironment
-
-
-def main():
-    """Main function to run the Arena environment."""
-    
-    # =========================================================================
-    # STEP 4: Create Environment Definition
-    # =========================================================================
-    print(f"\n{'='*60}")
-    print(f"Creating Burger Stack Environment")
-    print(f"  Embodiment: {args_cli.embodiment}")
-    print(f"  Teleop Device: {args_cli.teleop_device}")
-    print(f"  Cameras: {args_cli.enable_cameras}")
-    print(f"  Num Envs: {args_cli.num_envs}")
-    print(f"{'='*60}\n")
-    
-    # Get environment definition
-    env_definition = BurgerStackEnvironment()
-    arena_env = env_definition.get_env(args_cli)
-    
-    # =========================================================================
-    # STEP 5: Build and Register Environment
-    # ArenaEnvBuilder converts Arena components into Isaac Lab ManagerBasedRLEnvCfg
-    # Reference: https://deepwiki.com/isaac-sim/IsaacLab-Arena/7.1-creating-custom-environments
-    # =========================================================================
-    env_builder = ArenaEnvBuilder(arena_env, args_cli)
-    
-    # This does two things:
-    # 1. Registers environment with Gymnasium
-    # 2. Returns the environment configuration
-    env = env_builder.make_registered()
-    
-    print(f"Environment registered as: {env_definition.name}")
-    print(f"Observation space: {env.observation_space}")
-    print(f"Action space: {env.action_space}")
-    
-    # =========================================================================
-    # STEP 6: Run Simulation Loop
-    # =========================================================================
-    print("\nStarting simulation...")
-    print("Press Ctrl+C to stop\n")
-    
-    obs, _ = env.reset()
-    
-    step_count = 0
-    try:
-        while simulation_app.is_running():
-            # Random actions for testing
-            # Replace with your policy for training/evaluation
-            action = env.action_space.sample()
-            
-            # Environment step
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            step_count += 1
-            
-            # Print progress every 100 steps
-            if step_count % 100 == 0:
-                print(f"Step {step_count}, Reward: {reward.mean().item():.4f}")
-            
-            # Reset if episode ended
-            if terminated.any() or truncated.any():
-                print(f"Episode ended at step {step_count}, resetting...")
-                obs, _ = env.reset()
-                
-    except KeyboardInterrupt:
-        print("\nSimulation stopped by user")
-    
-    # =========================================================================
-    # STEP 7: Cleanup
-    # =========================================================================
-    env.close()
-    simulation_app.close()
-
-
-if __name__ == "__main__":
-    main()
-```
-
-> 📖 **Reference**: [Isaac Lab AppLauncher Tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/00_sim/launch_app.html)
-
----
-
-## Step 4: Register Assets and Environment
-
-### 4.1 Update Module `__init__.py`
-
-Update `source/burger_assembly_arena/burger_assembly_arena/__init__.py`:
-
-```python
-# =============================================================================
-# BURGER ASSEMBLY ARENA MODULE
-# This __init__.py imports and exposes all components of the module.
-# =============================================================================
-
-# Import assets to register them with Arena
-from .assets import patty  # Triggers @register_asset decorators
-
-# Import environments
-from .environments.burger_stack_env import (
-    BurgerStackEnvironment,
-    BurgerCheeseStackEnvironment,
-)
-
-# Module version
-__version__ = "0.1.0"
-
-# Expose for easy import
-__all__ = [
-    "BurgerStackEnvironment",
-    "BurgerCheeseStackEnvironment",
-]
-```
-
-### 4.2 Update Assets `__init__.py`
-
-Update `source/burger_assembly_arena/burger_assembly_arena/assets/__init__.py`:
-
-```python
-# =============================================================================
-# ASSETS MODULE
-# Importing this module registers all custom assets with Arena's registry.
-# =============================================================================
-
-from . import patty
-
-# You can also explicitly import classes if needed
-from .patty import Patty, CheeseSlice, BunBottom, BunTop
-
-__all__ = [
-    "Patty",
-    "CheeseSlice", 
-    "BunBottom",
-    "BunTop",
-]
-```
-
----
-
-## Step 5: Install and Test
-
-### 5.1 Install the Project
-
-```bash
-# Navigate to project root
-cd burger_assembly_arena
-
-# Install in editable mode
-pip install -e source/burger_assembly_arena
-
-# Verify installation
-python -c "import burger_assembly_arena; print('Success!')"
-```
-
-### 5.2 List Registered Environments
-
-```bash
-# Use the built-in list script
-python scripts/list_envs.py
-
-# You should see your environment listed:
-# burger_patty_stack
-```
-
-### 5.3 Test with Random Agent
-
-```bash
-# Test environment loads correctly
-python scripts/run_arena_env.py --embodiment franka --num_envs 1
-
-# Test with headless mode (faster, no GUI)
-python scripts/run_arena_env.py --embodiment franka --num_envs 16 --headless
-```
-
----
-
-## Step 6: Train with RL
-
-### 6.1 Create Training Configuration
-
-Create `source/burger_assembly_arena/burger_assembly_arena/agents/skrl_ppo_cfg.py`:
-
-```python
-# =============================================================================
-# SKRL PPO CONFIGURATION FOR BURGER STACKING
-# Reference: https://skrl.readthedocs.io/en/latest/
-# =============================================================================
-
-from skrl.agents.torch.ppo import PPO_DEFAULT_CONFIG
-
-SKRL_PPO_CFG = PPO_DEFAULT_CONFIG.copy()
-
-# Update with task-specific hyperparameters
-SKRL_PPO_CFG.update({
-    # Learning parameters
-    "learning_rate": 3e-4,
-    "learning_rate_scheduler": "KLAdaptiveLR",
-    "learning_rate_scheduler_kwargs": {
-        "kl_threshold": 0.01,
-    },
-    
-    # PPO parameters
-    "rollouts": 16,
-    "learning_epochs": 8,
-    "mini_batches": 4,
-    "discount_factor": 0.99,
-    "lambda": 0.95,
-    "clip_ratio": 0.2,
-    "value_clip_ratio": 0.2,
-    
-    # Entropy for exploration
-    "entropy_loss_scale": 0.01,
-    
-    # Network
-    "state_preprocessor": None,
-    "state_preprocessor_kwargs": {},
-    "value_preprocessor": None,
-    "value_preprocessor_kwargs": {},
-})
-```
-
-### 6.2 Run Training
-
-```bash
-# Train with SKRL
-python scripts/skrl/train.py \
-    --task=burger_patty_stack \
-    --num_envs=1024 \
-    --headless \
-    --max_iterations=5000
-
-# Monitor with TensorBoard
-tensorboard --logdir=logs/burger_patty_stack
-```
-
-> 📖 **Reference**: [Isaac Lab RL Training](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/run_rl_training.html)
-
----
-
-## Step 7: Easy Switching Demo
-
-### 7.1 Switch Robots
-
-```bash
-# Train with Franka
-python scripts/run_arena_env.py --embodiment franka
-
-# Train with different robot (if registered in Arena)
-python scripts/run_arena_env.py --embodiment ur10
-
-# The ONLY change is the --embodiment argument!
-```
-
-### 7.2 Switch Objects
-
-In your environment file, simply change one line:
-
-```python
-# Original: Pick up patty
-pick_object = asset_registry.get_asset_by_name("patty")()
-
-# Variant 1: Pick up cheese
-pick_object = asset_registry.get_asset_by_name("cheese_slice")()
-
-# Variant 2: Use Arena's pre-built objects
-pick_object = asset_registry.get_asset_by_name("tomato_soup_can")()
-pick_object = asset_registry.get_asset_by_name("cracker_box")()
-pick_object = asset_registry.get_asset_by_name("mustard_bottle")()
-```
-
-### 7.3 Create Multiple Environment Variants
-
-```python
-# In your environments/__init__.py, register multiple variants:
-
-ENVIRONMENTS = {
-    "burger_patty_stack": BurgerStackEnvironment,
-    "burger_cheese_stack": BurgerCheeseStackEnvironment,
-    # Easy to add more:
-    "burger_lettuce_stack": BurgerLettuceStackEnvironment,
-    "burger_full_assembly": BurgerFullAssemblyEnvironment,
-}
-
-# Now you can train on ANY variant with:
-# python scripts/skrl/train.py --task=burger_cheese_stack
-```
-
----
-
-## 📋 Quick Reference Summary
-
-### File Locations
-
-| File | Purpose |
-|------|---------|
-| `environments/burger_stack_env.py` | Arena environment composition |
-| `assets/patty.py` | Custom asset definitions |
-| `scripts/run_arena_env.py` | Entry point for running |
-| `scripts/skrl/train.py` | RL training script |
-
-### Key Arena APIs
-
-```python
-# Get robot from registry
-embodiment = asset_registry.get_asset_by_name("franka")(enable_cameras=True)
-
-# Get objects from registry  
-obj = asset_registry.get_asset_by_name("patty")()
-obj.set_initial_pose(Pose(position_xyz=(x, y, z)))
-
-# Compose scene
-scene = Scene(assets=[background, obj1, obj2])
-
-# Define task
-task = PickAndPlaceTask(pick_obj, destination, background)
 
 # Create environment
-env = IsaacLabArenaEnvironment(name, embodiment, scene, task, teleop)
+env_def = SoupPickupEnvironment()
+arena_env = env_def.get_env(args)
 
-# Build and register
-builder = ArenaEnvBuilder(env, args_cli)
-gym_env = builder.make_registered()
+print(f'Environment created: {arena_env.name}')
+print('Success!')
+"
 ```
 
-### CLI Commands
+---
+
+## 10. Docker Cheat Sheet
+
+### Essential Commands
+
+| Command | What It Does |
+|---------|--------------|
+| `./docker/run_docker.sh` | Start container and enter it |
+| `exit` | Leave container (keeps it running) |
+| `docker ps` | List running containers |
+| `docker ps -a` | List all containers (including stopped) |
+| `docker stop <name>` | Stop a container |
+| `docker start <name>` | Start a stopped container |
+| `docker exec -it <name> bash` | Enter a running container |
+| `docker images` | List downloaded images |
+| `docker system prune` | Clean up unused data |
+
+### Working with the Arena Container
 
 ```bash
-# Generate new project
-./isaaclab.sh --new
+# Check if Arena container is running
+docker ps | grep isaac
 
-# Install project
-pip install -e source/burger_assembly_arena
+# Enter an already-running Arena container
+docker exec -it <container_name> bash
 
-# Run environment
-python scripts/run_arena_env.py --embodiment franka
+# Stop the Arena container
+docker stop <container_name>
 
-# Train policy
-python scripts/skrl/train.py --task=burger_patty_stack --headless
+# Remove the container (image remains)
+docker rm <container_name>
 
-# Evaluate policy
-python scripts/skrl/play.py --task=burger_patty_stack --checkpoint=path/to/model
+# Remove everything and start fresh
+docker system prune -a  # WARNING: Deletes all images!
+```
+
+### Understanding Mounted Volumes
+
+When you run `./docker/run_docker.sh`, certain folders are "mounted" (shared):
+
+```
+YOUR COMPUTER (Host)              INSIDE CONTAINER
+─────────────────────────────────────────────────────────────
+~/IsaacLab-Arena/          ←→    /workspace/isaaclab-arena/
+  (your code edits here)           (appears here too)
+
+Changes sync instantly in both directions!
+```
+
+This means you can:
+1. Edit code in VS Code on your host
+2. Run it inside the container
+3. See results immediately
+
+### Copying Files In/Out
+
+```bash
+# Copy from host to container
+docker cp myfile.py <container_name>:/workspace/isaaclab-arena/
+
+# Copy from container to host
+docker cp <container_name>:/workspace/isaaclab-arena/logs ./logs
 ```
 
 ---
 
-## 🔗 Additional Resources
+## 11. Troubleshooting
 
-### Documentation
-- [Isaac Lab Arena Main Docs](https://isaac-sim.github.io/IsaacLab-Arena/main/index.html)
-- [Isaac Lab Tutorials](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/index.html)
-- [NVIDIA Developer Blog on Arena](https://developer.nvidia.com/blog/simplify-generalist-robot-policy-evaluation-in-simulation-with-nvidia-isaac-lab-arena)
+### "permission denied" when running docker
 
-### Video Tutorials
-- [LycheeAI Hub - Isaac Lab](https://lycheeai-hub.com/isaac-lab)
-- [LycheeAI YouTube Channel](https://www.youtube.com/@LycheeAI)
+```bash
+# Add yourself to docker group
+sudo usermod -aG docker $USER
 
-### Example Code
-- [Arena Example Environments](https://github.com/isaac-sim/IsaacLab-Arena/tree/main/isaaclab_arena/examples/example_environments)
-- [GR1 Open Microwave Example](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/index.html)
-- [G1 Locomanipulation Example](https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/locomanipulation/index.html)
+# Log out and back in, or run:
+newgrp docker
+```
 
-### Community
-- [Isaac Lab GitHub Discussions](https://github.com/isaac-sim/IsaacLab/discussions)
-- [NVIDIA Developer Forum - Robotics](https://forums.developer.nvidia.com/c/robotics/)
+### "could not select device driver" or GPU not found
+
+```bash
+# 1. Verify NVIDIA driver works on host
+nvidia-smi
+
+# 2. Restart Docker
+sudo systemctl restart docker
+
+# 3. Test GPU access
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+
+# 4. If still failing, reinstall NVIDIA Container Toolkit
+sudo apt remove nvidia-container-toolkit
+sudo apt install nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+### Container starts but Isaac Sim crashes
+
+Common causes:
+- Insufficient VRAM (need 8GB+)
+- Driver version too old (need 535+)
+
+```bash
+# Check VRAM usage
+nvidia-smi
+
+# Update driver if needed
+sudo apt install nvidia-driver-545
+sudo reboot
+```
+
+### "No module named isaaclab_arena"
+
+Make sure you initialized submodules:
+```bash
+cd ~/IsaacLab-Arena
+git submodule update --init --recursive
+```
+
+### Changes to code not appearing
+
+If you edit files on your host but don't see changes in the container:
+1. Make sure you're editing files in the mounted directory
+2. The mount is `/workspace/isaaclab-arena/` inside container
+3. Only certain directories are mounted — check `docker-compose.yaml`
+
+### Running out of disk space
+
+Docker images are large (~20GB for Arena). Free space:
+```bash
+# Remove unused containers and images
+docker system prune
+
+# Nuclear option: remove everything
+docker system prune -a
+```
 
 ---
 
-*Created for burger assembly automation project - easy task and object switching for sim-to-real robotics development.*
+## 12. Reference Links
+
+### Official Documentation
+
+| Resource | URL |
+|----------|-----|
+| **Isaac Lab Arena Docs** | https://isaac-sim.github.io/IsaacLab-Arena/main/index.html |
+| **Arena Installation** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/quickstart/installation.html |
+| **Arena GitHub** | https://github.com/isaac-sim/IsaacLab-Arena |
+| **Isaac Lab Docs** | https://isaac-sim.github.io/IsaacLab/main/index.html |
+| **Isaac Lab Docker Guide** | https://isaac-sim.github.io/IsaacLab/main/source/deployment/docker.html |
+| **Isaac Sim Docs** | https://docs.isaacsim.omniverse.nvidia.com/latest/index.html |
+
+### Docker & NVIDIA
+
+| Resource | URL |
+|----------|-----|
+| **Docker Install (Ubuntu)** | https://docs.docker.com/engine/install/ubuntu/ |
+| **Docker Post-Install** | https://docs.docker.com/engine/install/linux-postinstall/ |
+| **NVIDIA Container Toolkit** | https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html |
+
+### Arena Example Workflows
+
+| Workflow | Description | URL |
+|----------|-------------|-----|
+| **Franka Lift (RL)** | Train Franka to lift objects | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/reinforcement_learning/index.html |
+| **GR1 Microwave** | Open microwave door | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/static_manipulation/index.html |
+| **G1 Box Transport** | Humanoid carries box | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/example_workflows/locomanipulation/index.html |
+
+### Concepts Documentation
+
+| Concept | URL |
+|---------|-----|
+| **Environment Design** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_environment_design.html |
+| **Embodiment Design** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_embodiment_design.html |
+| **Tasks Design** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_tasks_design.html |
+| **Scene Design** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_scene_design.html |
+| **Assets Design** | https://isaac-sim.github.io/IsaacLab-Arena/main/pages/concepts/concept_assets_design.html |
+
+---
+
+## Quick Start Summary
+
+```bash
+# 1. Install Docker
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER && newgrp docker
+
+# 2. Install NVIDIA Container Toolkit
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sudo apt update && sudo apt install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+
+# 3. Clone Arena
+git clone https://github.com/isaac-sim/IsaacLab-Arena.git
+cd IsaacLab-Arena
+git submodule update --init --recursive
+
+# 4. Launch container
+./docker/run_docker.sh
+
+# 5. (Inside container) Run example
+python isaaclab_arena/scripts/run_env.py --enable_cameras franka_lift
+```
+
+---
+
+*Document created: February 2025*
+*Isaac Lab Arena version: 0.1.1*
+*Isaac Lab version: 2.3.0*
+*Isaac Sim version: 5.1.0*
